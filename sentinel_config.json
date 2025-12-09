@@ -1,0 +1,36 @@
+{
+    "roles": {
+        "free": null,
+        "premium": null,
+        "booster": null,
+        "custom": {}
+    },
+    "channels": {
+        "free": null,
+        "premium": null,
+        "booster": null,
+        "custom": {}
+    },
+    "cooldowns": {
+        "free": 300,
+        "premium": 60,
+        "booster": 0,
+        "custom": {}
+    },
+    "limits": {
+        "free": 5,
+        "premium": 20,
+        "booster": 100,
+        "custom": {}
+    },
+    "settings": {
+        "log_channel": null,
+        "one_time_view": true,
+        "dm_fallback": true,
+        "backup_interval": 60,
+        "prefix_enabled": true,
+        "vouch_channel": null,
+        "vouch_time_seconds": 120,
+        "vouch_ban_seconds": 120
+    }
+}

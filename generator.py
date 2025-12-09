@@ -307,44 +307,41 @@ class Generator(commands.Cog):
             else: await interaction.followup.send(embed=error_embed, ephemeral=True)
 
     # =========================================================================
-    # GENERATOR CORE COMMANDS (FREE, PREMIUM, BOOSTER)
-    # =========================================================================
+# GENERATOR CORE COMMANDS (FREE, PREMIUM, BOOSTER)
+# =========================================================================
 
-    # --- FREE GENERATOR ---
-    @commands.command(name="freegen", description="Generate a free account from a service")
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def freegen_prefix(self, ctx: commands.Context, service_name: str):
-        await self._handle_generation(ctx, service_name, 'free')
+# --- FREE GENERATOR ---
+@commands.command(name="fgen", description="Generate a free account from a service")
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def freegen_prefix(self, ctx: commands.Context, service_name: str):
+    await self._handle_generation(ctx, service_name, 'free')
         
-    @app_commands.command(name="freegen", description="Generate a free account from a service")
-    @app_commands.autocomplete(service_name=service_autocomplete)
-    @app_commands.cooldown(1, 5, app_commands.BucketType.user)
-    async def freegen_slash(self, interaction: discord.Interaction, service_name: str):
-        await self._handle_generation(interaction, service_name, 'free')
+@app_commands.command(name="fgen", description="Generate a free account from a service")
+@app_commands.autocomplete(service_name=service_autocomplete)
+async def freegen_slash(self, interaction, service_name: str):
+    await self._handle_generation(interaction, service_name, 'free')
 
-    # --- PREMIUM GENERATOR ---
-    @commands.command(name="premiumgen", description="Generate a premium account from a service")
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def premiumgen_prefix(self, ctx: commands.Context, service_name: str):
-        await self._handle_generation(ctx, service_name, 'premium')
+# --- PREMIUM GENERATOR ---
+@commands.command(name="pgen", description="Generate a premium account from a service")
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def premiumgen_prefix(self, ctx: commands.Context, service_name: str):
+    await self._handle_generation(ctx, service_name, 'premium')
 
-    @app_commands.command(name="premiumgen", description="Generate a premium account from a service")
-    @app_commands.autocomplete(service_name=service_autocomplete)
-    @app_commands.cooldown(1, 5, app_commands.BucketType.user)
-    async def premiumgen_slash(self, interaction: discord.Interaction, service_name: str):
-        await self._handle_generation(interaction, service_name, 'premium')
+@app_commands.command(name="pgen", description="Generate a premium account from a service")
+@app_commands.autocomplete(service_name=service_autocomplete)
+async def premiumgen_slash(self, interaction, service_name: str):
+    await self._handle_generation(interaction, service_name, 'premium')
 
-    # --- BOOSTER GENERATOR ---
-    @commands.command(name="boostergen", description="Generate a booster account from a service")
-    @commands.cooldown(1, 5, commands.BucketType.user)
-    async def boostergen_prefix(self, ctx: commands.Context, service_name: str):
-        await self._handle_generation(ctx, service_name, 'booster')
+# --- BOOSTER GENERATOR ---
+@commands.command(name="bgen", description="Generate a booster account from a service")
+@commands.cooldown(1, 5, commands.BucketType.user)
+async def boostergen_prefix(self, ctx: commands.Context, service_name: str):
+    await self._handle_generation(ctx, service_name, 'booster')
         
-    @app_commands.command(name="boostergen", description="Generate a booster account from a service")
-    @app_commands.autocomplete(service_name=service_autocomplete)
-    @app_commands.cooldown(1, 5, app_commands.BucketType.user)
-    async def boostergen_slash(self, interaction: discord.Interaction, service_name: str):
-        await self._handle_generation(interaction, service_name, 'booster')
+@app_commands.command(name="bgen", description="Generate a booster account from a service")
+@app_commands.autocomplete(service_name=service_autocomplete)
+async def boostergen_slash(self, interaction, service_name: str):
+    await self._handle_generation(interaction, service_name, 'booster')
 
     # =========================================================================
     # CONFIGURATION COMMANDS
@@ -1278,12 +1275,3 @@ class Generator(commands.Cog):
 async def setup(bot: commands.Bot) -> None:
     cog = Generator(bot)
     await bot.add_cog(cog)
-
-    # Update autocomplete mappings for the renamed slash commands
-    freegen_slash_autocomplete = app_commands.autocomplete(service_name=cog.service_autocomplete)
-    premiumgen_slash_autocomplete = app_commands.autocomplete(service_name=cog.service_autocomplete)
-    boostergen_slash_autocomplete = app_commands.autocomplete(service_name=cog.service_autocomplete)
-
-    freegen_slash_autocomplete(cog.freegen_slash)
-    premiumgen_slash_autocomplete(cog.premiumgen_slash)
-    boostergen_slash_autocomplete(cog.boostergen_slash)

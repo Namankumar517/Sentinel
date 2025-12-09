@@ -1,4 +1,4 @@
-# utility.py
+# utility.py (fixed) — only changed: removed discord.Interaction annotations and fixed indentation for emoji block
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -15,13 +15,15 @@ import random
 import string
 import ast  # Added for safer evaluation in calc command
 from discord.ext.commands import Context
+import os
+import math
 
 # --- Global Constants for Utility ---
 AFK_TIMEOUT = 120  # Time in seconds for AFK status expiry (2 minutes)
 AFK_TIMEOUT_MSG = "Your AFK status was automatically removed after 2 minutes of activity."
 
 # --- Helper Functions for Context Handling ---
-async def send_response(context: Union[discord.Interaction, commands.Context], content: Optional[str] = None, embed: Optional[discord.Embed] = None, ephemeral: bool = False, file: Optional[discord.File] = None):
+async def send_response(context, content: Optional[str] = None, embed: Optional[discord.Embed] = None, ephemeral: bool = False, file: Optional[discord.File] = None):
     """Sends the response based on whether it's a slash or prefix context."""
     if isinstance(context, discord.Interaction):
         # Slash commands must be handled via response or followup
@@ -59,7 +61,7 @@ class Utility(commands.Cog):
     # ----------------------------
     # 1. Invite Command
     # ----------------------------
-    async def _invite_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _invite_logic(self, context):
         """Core logic for sending the bot's invite link."""
         
         # ✅ FIXED: Permissions set to a safer value (281872).
@@ -81,13 +83,13 @@ class Utility(commands.Cog):
         await self._invite_logic(ctx)
 
     @app_commands.command(name="invite", description="Sends the bot's invite link.")
-    async def invite_slash(self, interaction: discord.Interaction):
+    async def invite_slash(self, interaction):
         await self._invite_logic(interaction)
 
     # ----------------------------
     # 2. Ping Command
     # ----------------------------
-    async def _ping_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _ping_logic(self, context):
         """Core logic for checking bot latency."""
         latency = round(self.bot.latency * 1000)
         embed = self.premium_embed(
@@ -118,13 +120,13 @@ class Utility(commands.Cog):
         await self._ping_logic(ctx)
 
     @app_commands.command(name="ping", description="Checks the bot's latency.")
-    async def ping_slash(self, interaction: discord.Interaction):
+    async def ping_slash(self, interaction):
         await self._ping_logic(interaction)
 
     # ----------------------------
     # 3. Uptime Command
     # ----------------------------
-    async def _uptime_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _uptime_logic(self, context):
         """Core logic for displaying bot uptime."""
         current_time = time.time()
         difference = int(round(current_time - self.start_time))
@@ -148,13 +150,13 @@ class Utility(commands.Cog):
         await self._uptime_logic(ctx)
 
     @app_commands.command(name="uptime", description="Displays how long the bot has been running.")
-    async def uptime_slash(self, interaction: discord.Interaction):
+    async def uptime_slash(self, interaction):
         await self._uptime_logic(interaction)
 
     # ----------------------------
     # 4. Bot Info Command
     # ----------------------------
-    async def _botinfo_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _botinfo_logic(self, context):
         """Core logic for displaying detailed bot information."""
         
         owner = self.bot.get_user(self.bot.owner_id) if self.bot.owner_id else "N/A"
@@ -193,13 +195,13 @@ class Utility(commands.Cog):
         await self._botinfo_logic(ctx)
 
     @app_commands.command(name="botinfo", description="Displays detailed information about the bot.")
-    async def botinfo_slash(self, interaction: discord.Interaction):
+    async def botinfo_slash(self, interaction):
         await self._botinfo_logic(interaction)
 
     # ----------------------------
     # 5. Server Count Command
     # ----------------------------
-    async def _servercount_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _servercount_logic(self, context):
         """Core logic for showing server and user count."""
         server_count = len(self.bot.guilds)
         user_count = len(self.bot.users)
@@ -216,13 +218,13 @@ class Utility(commands.Cog):
         await self._servercount_logic(ctx)
 
     @app_commands.command(name="servercount", description="Displays the total number of servers and users the bot manages.")
-    async def servercount_slash(self, interaction: discord.Interaction):
+    async def servercount_slash(self, interaction):
         await self._servercount_logic(interaction)
 
     # ----------------------------
     # 6. Server Info Command
     # ----------------------------
-    async def _serverinfo_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _serverinfo_logic(self, context):
         """Core logic for displaying server information."""
         
         guild = context.guild
@@ -266,13 +268,13 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="serverinfo", description="Displays detailed server information.")
     @app_commands.guild_only()
-    async def serverinfo_slash(self, interaction: discord.Interaction):
+    async def serverinfo_slash(self, interaction):
         await self._serverinfo_logic(interaction)
 
     # ----------------------------
     # 7. User Info Command
     # ----------------------------
-    async def _userinfo_logic(self, context: Union[discord.Interaction, commands.Context], member: Optional[discord.Member] = None):
+    async def _userinfo_logic(self, context, member: Optional[discord.Member] = None):
         """Core logic for displaying user/member information."""
         
         user = member or (context.user if isinstance(context, discord.Interaction) else context.author)
@@ -302,13 +304,13 @@ class Utility(commands.Cog):
     @app_commands.command(name="userinfo", description="Displays detailed information about a user.")
     @app_commands.guild_only()
     @app_commands.describe(member="The member to get information about (optional).")
-    async def userinfo_slash(self, interaction: discord.Interaction, member: Optional[discord.Member] = None):
+    async def userinfo_slash(self, interaction, member: Optional[discord.Member] = None):
         await self._userinfo_logic(interaction, member)
 
     # ----------------------------
     # 8. Server Icon Command
     # ----------------------------
-    async def _servericon_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _servericon_logic(self, context):
         """Core logic for displaying the server's icon."""
         guild = context.guild
         if not guild:
@@ -333,13 +335,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="servericon", description="Displays the server's icon in HD.")
     @app_commands.guild_only()
-    async def servericon_slash(self, interaction: discord.Interaction):
+    async def servericon_slash(self, interaction):
         await self._servericon_logic(interaction)
 
     # ----------------------------
     # 9. Server Banner Command
     # ----------------------------
-    async def _serverbanner_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _serverbanner_logic(self, context):
         """Core logic for displaying the server's banner."""
         guild = context.guild
         if not guild:
@@ -364,13 +366,13 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="serverbanner", description="Displays the server's banner in HD.")
     @app_commands.guild_only()
-    async def serverbanner_slash(self, interaction: discord.Interaction):
+    async def serverbanner_slash(self, interaction):
         await self._serverbanner_logic(interaction)
 
     # ----------------------------
     # 10. Channel Info Command
     # ----------------------------
-    async def _channelinfo_logic(self, context: Union[discord.Interaction, commands.Context], channel: Optional[Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]] = None):
+    async def _channelinfo_logic(self, context, channel: Optional[Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]] = None):
         """Core logic for displaying channel information."""
         
         target_channel = channel or (context.channel if isinstance(context, commands.Context) else context.channel)
@@ -405,13 +407,13 @@ class Utility(commands.Cog):
     @app_commands.command(name="channelinfo", description="Displays information about a channel.")
     @app_commands.guild_only()
     @app_commands.describe(channel="The channel to get information about (optional).")
-    async def channelinfo_slash(self, interaction: discord.Interaction, channel: Optional[Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]] = None):
+    async def channelinfo_slash(self, interaction, channel: Optional[Union[discord.TextChannel, discord.VoiceChannel, discord.CategoryChannel]] = None):
         await self._channelinfo_logic(interaction, channel)
 
     # ----------------------------
     # 11. Role Info Command
     # ----------------------------
-    async def _roleinfo_logic(self, context: Union[discord.Interaction, commands.Context], role: discord.Role):
+    async def _roleinfo_logic(self, context, role: discord.Role):
         """Core logic for displaying role information."""
         
         guild = context.guild
@@ -441,13 +443,13 @@ class Utility(commands.Cog):
     @app_commands.command(name="roleinfo", description="Displays detailed information about a role.")
     @app_commands.guild_only()
     @app_commands.describe(role="The role to get information about.")
-    async def roleinfo_slash(self, interaction: discord.Interaction, role: discord.Role):
+    async def roleinfo_slash(self, interaction, role: discord.Role):
         await self._roleinfo_logic(interaction, role)
 
     # ----------------------------
     # 12. Server Stats Command
     # ----------------------------
-    async def _serverstats_logic(self, context: Union[discord.Interaction, commands.Context]):
+    async def _serverstats_logic(self, context):
         """Core logic for displaying server statistics."""
         
         guild = context.guild
@@ -480,13 +482,13 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="serverstats", description="Displays detailed server statistics.")
     @app_commands.guild_only()
-    async def serverstats_slash(self, interaction: discord.Interaction):
+    async def serverstats_slash(self, interaction):
         await self._serverstats_logic(interaction)
 
     # ----------------------------
     # 13. Weather Command
     # ----------------------------
-    async def _weather_logic(self, context: Union[discord.Interaction, commands.Context], city: str):
+    async def _weather_logic(self, context, city: str):
         """Core logic for getting weather information."""
         
         # ⚠️ NOTE: This logic is heavily dependent on a real API key (e.g., OpenWeatherMap) 
@@ -548,13 +550,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="weather", description="Gets the current weather for a specified city.")
     @app_commands.describe(city="The city name (e.g., London, Tokyo).")
-    async def weather_slash(self, interaction: discord.Interaction, city: str):
+    async def weather_slash(self, interaction, city: str):
         await self._weather_logic(interaction, city)
 
     # ----------------------------
     # 14. Poll Command
     # ----------------------------
-    async def _poll_logic(self, context: Union[discord.Interaction, commands.Context], question: str):
+    async def _poll_logic(self, context, question: str):
         """Core logic for creating a simple yes/no poll."""
         
         poll_embed = self.premium_embed(
@@ -596,13 +598,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="poll", description="Creates a simple yes/no poll.")
     @app_commands.describe(question="The question for the poll.")
-    async def poll_slash(self, interaction: discord.Interaction, question: str):
+    async def poll_slash(self, interaction, question: str):
         await self._poll_logic(interaction, question)
 
     # ----------------------------
     # 15. Remind Me Command
     # ----------------------------
-    async def _remindme_logic(self, context: Union[discord.Interaction, commands.Context], time_duration: str, reminder_text: str):
+    async def _remindme_logic(self, context, time_duration: str, reminder_text: str):
         """Core logic for setting a time-based reminder."""
         
         # Simple time parsing logic (10s, 5m, 2h, 1d)
@@ -657,13 +659,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="remindme", description="Sets a reminder for a specified time.")
     @app_commands.describe(time_duration="Time (e.g., 30s, 5m, 2h).", reminder_text="What to remind you about.")
-    async def remindme_slash(self, interaction: discord.Interaction, time_duration: str, reminder_text: str):
+    async def remindme_slash(self, interaction, time_duration: str, reminder_text: str):
         await self._remindme_logic(interaction, time_duration, reminder_text)
 
     # ----------------------------
     # 16. AFK Command
     # ----------------------------
-    async def _afk_logic(self, context: Union[discord.Interaction, commands.Context], reason: Optional[str] = "Away From Keyboard"):
+    async def _afk_logic(self, context, reason: Optional[str] = "Away From Keyboard"):
         """Core logic for setting an AFK status."""
         
         user_id = context.user.id if isinstance(context, discord.Interaction) else context.author.id
@@ -688,7 +690,7 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="afk", description="Sets your status as AFK.")
     @app_commands.describe(reason="The reason for being AFK (optional).")
-    async def afk_slash(self, interaction: discord.Interaction, reason: Optional[str] = "Away From Keyboard"):
+    async def afk_slash(self, interaction, reason: Optional[str] = "Away From Keyboard"):
         await self._afk_logic(interaction, reason)
 
     @commands.Cog.listener()
@@ -738,7 +740,7 @@ class Utility(commands.Cog):
     # ----------------------------
     # 17. Translate Command
     # ----------------------------
-    async def _translate_logic(self, context: Union[discord.Interaction, commands.Context], text_to_translate: str, target_language: str):
+    async def _translate_logic(self, context, text_to_translate: str, target_language: str):
         """Core logic for translating text."""
         
         # ⚠️ NOTE: This logic is dependent on a real translation API (e.g., Google Translate API/DeepL)
@@ -786,13 +788,13 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="translate", description="Translates text to a specified language code.")
     @app_commands.describe(text_to_translate="The text to translate.", target_language="Target language code (e.g., en, es).")
-    async def translate_slash(self, interaction: discord.Interaction, text_to_translate: str, target_language: str):
+    async def translate_slash(self, interaction, text_to_translate: str, target_language: str):
         await self._translate_logic(interaction, text_to_translate, target_language)
 
     # ----------------------------
     # 18. Suggest Command
     # ----------------------------
-    async def _suggest_logic(self, context: Union[discord.Interaction, commands.Context], suggestion: str):
+    async def _suggest_logic(self, context, suggestion: str):
         """Core logic for sending a suggestion to a dedicated channel."""
         
         guild = context.guild
@@ -837,13 +839,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="suggest", description="Sends a suggestion to the server staff.")
     @app_commands.describe(suggestion="The detailed suggestion you want to submit.")
-    async def suggest_slash(self, interaction: discord.Interaction, suggestion: str):
+    async def suggest_slash(self, interaction, suggestion: str):
         await self._suggest_logic(interaction, suggestion)
 
     # ----------------------------
     # 19. Shorten URL Command (Renamed from `shorten`)
     # ----------------------------
-    async def _shortenurl_logic(self, context: Union[discord.Interaction, commands.Context], url: str):
+    async def _shortenurl_logic(self, context, url: str):
         """Core logic for shortening a URL."""
         
         # ⚠️ NOTE: This logic is heavily dependent on a real shortening API (e.g., TinyURL, shrtco.de)
@@ -873,13 +875,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="shortenurl", description="Shortens a long URL.")
     @app_commands.describe(url="The full URL to shorten.")
-    async def shortenurl_slash(self, interaction: discord.Interaction, url: str):
+    async def shortenurl_slash(self, interaction, url: str):
         await self._shortenurl_logic(interaction, url)
         
     # ----------------------------
     # 20. Timestamp Command
     # ----------------------------
-    async def _timestamp_logic(self, context: Union[discord.Interaction, commands.Context], date: str, time_str: str, style: Optional[str] = "f"):
+    async def _timestamp_logic(self, context, date: str, time_str: str, style: Optional[str] = "f"):
         """Core logic for generating a Discord timestamp."""
         
         # Combine date and time (e.g., 2024-12-25 10:30)
@@ -917,13 +919,13 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="timestamp", description="Generates a Discord timestamp for a given date/time.")
     @app_commands.describe(date="Date (YYYY-MM-DD or DD-MM-YYYY).", time_str="Time (HH:MM 24hr).", style="Format style (t, T, d, D, f, F, R). Default: f.")
-    async def timestamp_slash(self, interaction: discord.Interaction, date: str, time_str: str, style: Optional[str] = "f"):
+    async def timestamp_slash(self, interaction, date: str, time_str: str, style: Optional[str] = "f"):
         await self._timestamp_logic(interaction, date, time_str, style)
 
     # ----------------------------
     # 21. QR Code Command
     # ----------------------------
-    async def _qrcode_logic(self, context: Union[discord.Interaction, commands.Context], text_or_url: str):
+    async def _qrcode_logic(self, context, text_or_url: str):
         """Core logic for generating a QR code image."""
         
         if isinstance(context, discord.Interaction):
@@ -968,13 +970,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="qrcode", description="Generates a QR code for text or URL.")
     @app_commands.describe(text_or_url="The text or URL to encode.")
-    async def qrcode_slash(self, interaction: discord.Interaction, text_or_url: str):
+    async def qrcode_slash(self, interaction, text_or_url: str):
         await self._qrcode_logic(interaction, text_or_url)
         
     # ----------------------------
     # 22. Password Gen Command (Renamed from `password`)
     # ----------------------------
-    async def _passwordgen_logic(self, context: Union[discord.Interaction, commands.Context], length: Optional[int] = 16):
+    async def _passwordgen_logic(self, context, length: Optional[int] = 16):
         """Core logic for generating a secure random password."""
         
         MAX_LENGTH = 128
@@ -1002,13 +1004,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="passwordgen", description="Generates a secure random password.")
     @app_commands.describe(length="Length of the password (8-128). Default: 16.")
-    async def passwordgen_slash(self, interaction: discord.Interaction, length: Optional[int] = 16):
+    async def passwordgen_slash(self, interaction, length: Optional[int] = 16):
         await self._passwordgen_logic(interaction, length)
 
     # ----------------------------
     # 23. Calculate Command (Renamed from `calc`)
     # ----------------------------
-    async def _calculate_logic(self, context: Union[discord.Interaction, commands.Context], expression: str):
+    async def _calculate_logic(self, context, expression: str):
         """Core logic for evaluating a mathematical expression."""
         
         # Safely evaluate the expression using ast.literal_eval and manual checks
@@ -1050,7 +1052,7 @@ class Utility(commands.Cog):
 
     @app_commands.command(name="calculate", description="Evaluates a mathematical expression.")
     @app_commands.describe(expression="The math expression to evaluate (e.g., 5*2+3).")
-    async def calculate_slash(self, interaction: discord.Interaction, expression: str):
+    async def calculate_slash(self, interaction, expression: str):
         # Import math library here locally if needed by eval
         import math
         await self._calculate_logic(interaction, expression)
@@ -1058,7 +1060,7 @@ class Utility(commands.Cog):
     # ----------------------------
     # 24. Color Info Command
     # ----------------------------
-    async def _colorinfo_logic(self, context: Union[discord.Interaction, commands.Context], hex_code: str):
+    async def _colorinfo_logic(self, context, hex_code: str):
         """Core logic for displaying color information from a HEX code."""
         
         hex_code = hex_code.lstrip('#').upper()
@@ -1093,13 +1095,13 @@ class Utility(commands.Cog):
         
     @app_commands.command(name="colorinfo", description="Displays information about a color from its HEX code.")
     @app_commands.describe(hex_code="The 6-digit HEX code (e.g., #FF5733).")
-    async def colorinfo_slash(self, interaction: discord.Interaction, hex_code: str):
+    async def colorinfo_slash(self, interaction, hex_code: str):
         await self._colorinfo_logic(interaction, hex_code)
 
     # ----------------------------
     # 25. Send Embed Command (Renamed from `embedmsg`)
     # ----------------------------
-    async def _sendembed_logic(self, context: Union[discord.Interaction, commands.Context], destination: discord.TextChannel, title: str, description: str, color: Optional[str] = None):
+    async def _sendembed_logic(self, context, destination: discord.TextChannel, title: str, description: str, color: Optional[str] = None):
         """Core logic for sending a custom embed message."""
         
         if isinstance(context, discord.Interaction) and not context.user.guild_permissions.manage_messages:
@@ -1142,33 +1144,45 @@ class Utility(commands.Cog):
     @app_commands.command(name="sendembed", description="Sends a custom embed message to a channel.")
     @app_commands.describe(destination="The channel to send the embed to.", title="The embed title.", description="The embed body text.", color="Optional HEX color code (e.g., #FF5733).")
     @app_commands.checks.has_permissions(manage_messages=True)
-    async def sendembed_slash(self, interaction: discord.Interaction, destination: discord.TextChannel, title: str, description: str, color: Optional[str] = None):
+    async def sendembed_slash(self, interaction, destination: discord.TextChannel, title: str, description: str, color: Optional[str] = None):
         await self._sendembed_logic(interaction, destination, title, description, color)
 
     # ----------------------------
-    # 26. Emoji Info Command
+    # 26. Emoji Info Command (FIXED INDENTATION)
     # ----------------------------
-    async def _emojiinfo_logic(self, context: Union[discord.Interaction, commands.Context], emoji: discord.PartialEmoji):
+    async def _emojiinfo_logic(self, context, emoji: str):
         """Core logic for getting information about a custom emoji."""
-        
-        if not emoji.is_custom_emoji():
-             embed = self.premium_embed("❌ Not a Custom Emoji", "Please provide a custom server emoji, not a standard Unicode emoji.")
-             return await send_response(context, embed=embed)
-             
+
+        try:
+            parsed = discord.PartialEmoji.from_str(emoji)
+        except:
+            embed = self.premium_embed("❌ Invalid Emoji", "Please provide a valid custom emoji.")
+            return await send_response(context, embed=embed, ephemeral=True)
+
+        if not parsed.id:
+            embed = self.premium_embed("❌ Not a Custom Emoji", "Please provide a **custom** Discord emoji, not a normal Unicode emoji.")
+            return await send_response(context, embed=embed, ephemeral=True)
+
         embed = self.premium_embed(
             "😎 Emoji Information",
-            f"**Name:** `{emoji.name}`\n**ID:** `{emoji.id}`\n**Animated:** {'✅' if emoji.animated else '❌'}\n**Server:** {emoji.guild_id or 'N/A'}\n**URL:** [Click Here]({emoji.url})"
+            f"**Name:** `{parsed.name}`\n"
+            f"**ID:** `{parsed.id}`\n"
+            f"**Animated:** {'✅' if parsed.animated else '❌'}\n"
+            f"**URL:** [Click Here]({parsed.url})"
         )
-        embed.set_thumbnail(url=emoji.url)
+        embed.set_thumbnail(url=parsed.url)
+
         await send_response(context, embed=embed)
 
+
     @commands.command(name="emojiinfo", help="Get information about a custom emoji.")
-    async def emojiinfo_prefix(self, ctx: commands.Context, emoji: discord.PartialEmoji):
+    async def emojiinfo_prefix(self, ctx: commands.Context, emoji: str):
         await self._emojiinfo_logic(ctx, emoji)
-        
+
+
     @app_commands.command(name="emojiinfo", description="Get information about a custom emoji.")
     @app_commands.describe(emoji="The custom emoji.")
-    async def emojiinfo_slash(self, interaction: discord.Interaction, emoji: discord.PartialEmoji):
+    async def emojiinfo_slash(self, interaction, emoji: str):
         await self._emojiinfo_logic(interaction, emoji)
         
 # -------------------------------------------------

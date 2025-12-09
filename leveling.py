@@ -1,3 +1,4 @@
+# Fixed leveling.py — only changed app_commands.group usage to a Group attribute on the Cog
 import discord
 from discord.ext import commands
 from discord import app_commands
@@ -354,6 +355,12 @@ async def _generate_rank_card(
 # ------------------------------------------------------
 
 class Leveling(commands.Cog):
+    # Create slash group properly as a class attribute (discord.py 2.6.4 compatible)
+    levelsettings = app_commands.Group(
+        name="levelsettings",
+        description="Configure the leveling system for this server"
+    )
+
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         # Load data on init
@@ -821,57 +828,53 @@ class Leveling(commands.Cog):
         await self._handle_level_setting(ctx, "cooldown", cooldown_seconds)
 
 
-    # --- Slash Command Group (Existing) ---
-    @app_commands.group(name="levelsettings", description="Configure the leveling system for this server")
-    @app_commands.default_permissions(administrator=True)
-    async def levelsettings_slash(self, interaction: discord.Interaction):
-        # The group itself will only show the help/info via a generic handler if no subcommand is passed, 
-        # but here we follow the standard discord.py group pattern.
-        if interaction.command is None:
-            config = get_guild_config(interaction.guild_id)
-            # ... (Show config summary, similar to prefix handler)
-            await interaction.response.send_message(embed=self.premium_embed("Leveling Configuration", "Use subcommands to manage settings."), ephemeral=True)
-        pass
-
-    # --- Slash Subcommands (Existing) ---
-    @levelsettings_slash.command(name="setrole", description="Set a role to be granted at a specific level")
+    # --- Slash Subcommands (registered under the class Group 'levelsettings') ---
+    @levelsettings.command(name="setrole", description="Set a role to be granted at a specific level")
     @app_commands.describe(level="The level to grant the role at (e.g., 5)", role="The role to be granted")
+    @app_commands.default_permissions(administrator=True)
     async def setrole_slash(self, interaction: discord.Interaction, level: app_commands.Range[int, 1], role: discord.Role):
         await self._handle_level_setting(interaction, "setrole", [level, role])
 
-    @levelsettings_slash.command(name="clearrole", description="Remove the role assigned to a specific level")
+    @levelsettings.command(name="clearrole", description="Remove the role assigned to a specific level")
     @app_commands.describe(level="The level to clear the role for")
+    @app_commands.default_permissions(administrator=True)
     async def clearrole_slash(self, interaction: discord.Interaction, level: app_commands.Range[int, 1]):
         await self._handle_level_setting(interaction, "clearrole", str(level))
 
-    @levelsettings_slash.command(name="ignorechannel", description="Toggle a channel for XP gain (ignored/not ignored)")
+    @levelsettings.command(name="ignorechannel", description="Toggle a channel for XP gain (ignored/not ignored)")
     @app_commands.describe(channel="The channel to toggle XP for")
+    @app_commands.default_permissions(administrator=True)
     async def ignorechannel_slash(self, interaction: discord.Interaction, channel: discord.TextChannel):
         await self._handle_level_setting(interaction, "ignorechannel", channel)
 
-    @levelsettings_slash.command(name="xpconfig", description="Set the min and max XP gained per message")
+    @levelsettings.command(name="xpconfig", description="Set the min and max XP gained per message")
     @app_commands.describe(min_xp="Minimum XP (1-100)", max_xp="Maximum XP (min_xp-100)")
+    @app_commands.default_permissions(administrator=True)
     async def xpconfig_slash(self, interaction: discord.Interaction, min_xp: app_commands.Range[int, 1, 100], max_xp: app_commands.Range[int, 1, 100]):
         # Note: Logic to ensure min <= max is inside _handle_level_setting
         await self._handle_level_setting(interaction, "xpconfig", [min_xp, max_xp])
 
-    @levelsettings_slash.command(name="rankcardconfig", description="Set the background image URL and text color for rank cards")
-    @app_commands.describe(background_url="URL or 'default'", text_color="Hex color code (e.g., #FFFFFF)")
+    @levelsettings.command(name="rankcardconfig", description="Set the background image URL and text color for rank cards")
+    @app_commands.describe(background_url="URL or 'default'", text_color="Hex color code (e.g., #FFFFFF')")
+    @app_commands.default_permissions(administrator=True)
     async def rankcardconfig_slash(self, interaction: discord.Interaction, background_url: str, text_color: str):
         await self._handle_level_setting(interaction, "rankcardconfig", [background_url, text_color])
 
-    @levelsettings_slash.command(name="messagechannel", description="Set the channel for level up messages")
+    @levelsettings.command(name="messagechannel", description="Set the channel for level up messages")
     @app_commands.describe(channel="The channel to send level up messages to")
+    @app_commands.default_permissions(administrator=True)
     async def messagechannel_slash(self, interaction: discord.Interaction, channel: discord.TextChannel):
         await self._handle_level_setting(interaction, "messagechannel", channel)
 
-    @levelsettings_slash.command(name="togglemessage", description="Enable or disable level up messages")
+    @levelsettings.command(name="togglemessage", description="Enable or disable level up messages")
     @app_commands.describe(state="True to enable, False to disable")
+    @app_commands.default_permissions(administrator=True)
     async def togglemessage_slash(self, interaction: discord.Interaction, state: bool):
         await self._handle_level_setting(interaction, "togglemessage", state)
         
-    @levelsettings_slash.command(name="cooldown", description="Set the cooldown in seconds between XP gain (5-300)")
-    @app_commands.describe(cooldown_seconds="The cooldown in seconds (5-300)")
+    @levelsettings.command(name="cooldown", description="Set the cooldown in seconds between XP gain (5-300)")
+    @app_commands.describe(cooldown_seconds="The cooldown in the seconds (5-300)")
+    @app_commands.default_permissions(administrator=True)
     async def cooldown_slash(self, interaction: discord.Interaction, cooldown_seconds: app_commands.Range[int, 5, 300]):
         await self._handle_level_setting(interaction, "cooldown", cooldown_seconds)
 
